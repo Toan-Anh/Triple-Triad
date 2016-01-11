@@ -14,7 +14,7 @@ namespace Triple_Triad
     {
         private static LogWriter _Instance;
         private static Queue<Log> _LogQueue;
-        private static string logDir = "E:/";
+        private static string logDir = "";
         private static string logFile = "TripleTriadLog.txt";
         private static int maxLogAge = int.Parse("1");
         private static int queueSize = int.Parse("10");

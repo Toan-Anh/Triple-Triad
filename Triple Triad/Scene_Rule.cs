@@ -86,12 +86,12 @@ namespace Triple_Triad
                 //    Global.SceneManager.CurrentScene = new Scene_PickCards();
             }
 
-            _HelpWindow.Width = Global.ScreenWidth - (int)(Global.BoardScaleH * 64 * 2);
+            _HelpWindow.Width = (int)(background.ViewportWidth * Global.BoardScaleH - Global.BoardScaleH * 64 * 2);
             _HelpWindow.ScreenPosition = new Vector2((int)(Global.BoardScaleH * 64), (int)(Global.ScreenHeight - _HelpWindow.Height - Global.BoardScaleV * 16));
             _HelpWindow.Update(gameTime);
 
             _RuleWindow.ScreenPosition = new Vector2((int)(Global.BoardScaleH * 64), (int)(Global.BoardScaleV * 16));
-            _RuleWindow.Width = Global.ScreenWidth - (int)(Global.BoardScaleH * 64 * 2);
+            _RuleWindow.Width = (int)(background.ViewportWidth * Global.BoardScaleH - Global.BoardScaleH * 64 * 2);
             _RuleWindow.Height = (int)(_HelpWindow.ScreenPosition.Y - _RuleWindow.ScreenPosition.Y - Global.BoardScaleV * 8);
             _RuleWindow.Update(gameTime);
         }

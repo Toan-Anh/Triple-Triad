@@ -20,8 +20,8 @@ namespace Triple_Triad
         private Sprite spriteBoard;
         private Sprite selectedGrid;
 
-        private int simulateInterval = 1250;
-        private int simulateCount = 0;
+        //private int simulateInterval = 1250;
+        //private int simulateCount = 0;
 
         private VisibleEntity _PrevMouseTarget;
         private VisibleEntity _CurrMouseTarget;
@@ -29,8 +29,8 @@ namespace Triple_Triad
         private Window _HelpWindow;
 
         private TripleTriadCard selectedCard;
-        private int selectedCardIndex;
-        private int selectedGridIndex;
+        //private int selectedCardIndex;
+        //private int selectedGridIndex;
 
         private Vector2[] _ScorePos;
 
@@ -77,16 +77,19 @@ namespace Triple_Triad
             // Initialize text sprites
             InitScreenText();
 
-            RegisterAnimation("10", new SpriteAnimation_Fly(TripleTriadGame.Player1Cards[0], 0, 100));
-            RegisterAnimation("11", new SpriteAnimation_Fly(TripleTriadGame.Player1Cards[1], 0, 150));
-            RegisterAnimation("12", new SpriteAnimation_Fly(TripleTriadGame.Player1Cards[2], 0, 200));
-            RegisterAnimation("13", new SpriteAnimation_Fly(TripleTriadGame.Player1Cards[3], 0, 250));
-            RegisterAnimation("14", new SpriteAnimation_Fly(TripleTriadGame.Player1Cards[4], 0, 300));
-            StartAnimation("10");
-            StartAnimation("11");
-            StartAnimation("12");
-            StartAnimation("13");
-            StartAnimation("14");
+            //RegisterAnimation("10", new SpriteAnimation_Fly(TripleTriadGame.Player1Cards[0], 0, 80));
+            //RegisterAnimation("11", new SpriteAnimation_Fly(TripleTriadGame.Player1Cards[1], 0, 80), "10", FireTime.AtEnd);
+            //RegisterAnimation("12", new SpriteAnimation_Fly(TripleTriadGame.Player1Cards[2], 0, 80), "11", FireTime.AtEnd);
+            //RegisterAnimation("13", new SpriteAnimation_Fly(TripleTriadGame.Player1Cards[3], 0, 80), "12", FireTime.AtEnd);
+            //RegisterAnimation("14", new SpriteAnimation_Fly(TripleTriadGame.Player1Cards[4], 0, 80), "13", FireTime.AtEnd);
+
+            //RegisterAnimation("20", new SpriteAnimation_Fly(TripleTriadGame.Player2Cards[0], 0, 80), "14", FireTime.AtEnd);
+            //RegisterAnimation("21", new SpriteAnimation_Fly(TripleTriadGame.Player2Cards[1], 0, 80), "20", FireTime.AtEnd);
+            //RegisterAnimation("22", new SpriteAnimation_Fly(TripleTriadGame.Player2Cards[2], 0, 80), "21", FireTime.AtEnd);
+            //RegisterAnimation("23", new SpriteAnimation_Fly(TripleTriadGame.Player2Cards[3], 0, 80), "22", FireTime.AtEnd);
+            //RegisterAnimation("24", new SpriteAnimation_Fly(TripleTriadGame.Player2Cards[4], 0, 80), "23", FireTime.AtEnd);
+
+            //StartAnimation("10");
         }
 
         private void InitScreenText()
@@ -167,9 +170,6 @@ namespace Triple_Triad
         {
             base.Update(gameTime);
 
-            //foreach (Sprite text in _ScreenText)
-            //    text.Update(gameTime);
-
             if (TripleTriadGame.NumberOfCardPlayed == 9)
             {
                 if (TripleTriadGame.P1Score > 5)
@@ -202,7 +202,7 @@ namespace Triple_Triad
             }
             else if (TripleTriadGame.PlayerTurn == 2)
             {
-                //SimulateTraversingCards(gameTime, TripleTriadGame.Player2Cards, 2);
+                SimulateTraversingCards(gameTime, TripleTriadGame.Player2Cards, 2);
                 UpdatePlayersCardPositions(gameTime, TripleTriadGame.Player2Cards, 2);
                 PlayNextCard(2);
             }
@@ -270,7 +270,7 @@ namespace Triple_Triad
 
         private void UpdateHelpWindow(GameTime gameTime)
         {
-            _HelpWindow.Width = Global.ScreenWidth - (int)(Global.BoardScaleH * 96 * 2);
+            _HelpWindow.Width = (int)(spriteBoard.ViewportWidth * Global.BoardScaleH - Global.BoardScaleH * 96 * 2);
             _HelpWindow.ScreenPosition = new Vector2(Global.BoardScaleH * 96, (int)(Global.ScreenHeight - _HelpWindow.Height - Global.BoardScaleV * 8));
             _HelpWindow.Update(gameTime);
 

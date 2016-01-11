@@ -25,6 +25,15 @@ namespace Triple_Triad.SpriteAnimation
             set { _AnimationState = value; }
         }
 
+        protected FireTime _FireTime = FireTime.None;
+        public FireTime FireTime
+        {
+            get { return _FireTime; }
+            set { _FireTime = value; }
+        }
+
+        protected List<SpriteAnimation_Base> _SiblingAnimation = new List<SpriteAnimation_Base>();
+
         /// <summary>
         /// Contructor for the animation
         /// </summary>
@@ -38,6 +47,11 @@ namespace Triple_Triad.SpriteAnimation
             _AnimationInterval = animationInterval;
         }
 
+        public virtual void AddSibling(SpriteAnimation_Base sibling)
+        {
+            _SiblingAnimation.Add(sibling);
+        }
+
         public virtual void Update(GameTime gameTime)
         {
             //_Sprite.Update(gameTime);
@@ -49,10 +63,13 @@ namespace Triple_Triad.SpriteAnimation
             }
             else if (_AnimationState == AnimationState.Animate)
             {
+                StartSiblingAnimations(FireTime.AtStart);
                 if (_AnimationDelayCount < _AnimationDelayInterval)
                     _AnimationDelayCount += gameTime.ElapsedGameTime.Milliseconds;
                 else
                 {
+                    if (_AnimationCount == 0)
+                        Global.SFXManager.Card.Play();
                     if (_AnimationCount < _AnimationInterval)
                     {
                         _AnimationCount = MathHelper.Clamp(_AnimationCount + gameTime.ElapsedGameTime.Milliseconds, 0, _AnimationInterval);
@@ -62,7 +79,22 @@ namespace Triple_Triad.SpriteAnimation
                     {
                         PostAnimation();
                         _AnimationState = AnimationState.End;
+                        StartSiblingAnimations(FireTime.AtEnd);
                     }
+                }
+            }
+        }
+
+        protected virtual void StartSiblingAnimations(FireTime fireTime)
+        {
+            foreach (SpriteAnimation_Base animation in _SiblingAnimation)
+            {
+                if (animation._FireTime == fireTime)
+                {
+                    if (animation.AnimationState == AnimationState.End)
+                        animation.Reset();
+                    if (animation.AnimationState == AnimationState.Waiting)
+                        animation.AnimationState = AnimationState.Animate;
                 }
             }
         }

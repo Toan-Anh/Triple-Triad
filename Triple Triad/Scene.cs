@@ -6,9 +6,15 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Triple_Triad.SpriteAnimation;
+using Microsoft.Xna.Framework.Input;
 
 namespace Triple_Triad
 {
+    public enum FireTime
+    {
+        None, AtStart, AtEnd, 
+    }
+
     abstract class Scene
     {
         protected List<VisibleEntity> _SceneEntities;
@@ -30,6 +36,16 @@ namespace Triple_Triad
         {
             if (!_Animations.ContainsKey(name))
                 _Animations.Add(name, animation);
+        }
+
+        public virtual void RegisterAnimation(string name, SpriteAnimation_Base animation, string cousinAnimation, FireTime fireTime)
+        {
+            animation.FireTime = fireTime;
+            if (!_Animations.ContainsKey(name) && _Animations.ContainsKey(cousinAnimation))
+            {
+                _Animations[cousinAnimation].AddSibling(animation);
+                _Animations.Add(name, animation);
+            }
         }
 
         public virtual void StartAnimation(string name)
