@@ -6,23 +6,23 @@ using System.Text;
 
 namespace Triple_Triad.SpriteAnimation
 {
-    class SpriteAnimation_Move : SpriteAnimation_Base
+    class SpriteAnimation_Scale : SpriteAnimation_Base
     {
-        private Vector2 _StartPosition;
-        private Vector2 _EndPosition;
+        private float _StartScale;
+        private float _EndScale;
 
         /// <summary>
-        /// Contructor for the moving animation 
+        /// Contructor for the scaling animation
         /// </summary>
         /// <param name="sprite">The sprite to be animated</param>
-        /// <param name="start">The animation's starting position</param>
-        /// <param name="end">The animation's ending position</param>
         /// <param name="delay">The animation delay time in miliseconds. The default value is 0.</param>
         /// <param name="time">The animation time in miliseconds. The default value is 1000.</param>
-        public SpriteAnimation_Move(Sprite sprite, Vector2 start, Vector2 end, int delay = 0, int time = 1000) : base(sprite, delay, time)
+        /// <param name="startScale">The scale used at the start of the animation. The default value is 1.</param>
+        /// <param name="endScale">The scale used at the end of the animation. The default value is 2.</param>
+        public SpriteAnimation_Scale(Sprite sprite, int delay = 0, int time = 1000, float startScale = 1f, float endScale = 2f) : base(sprite, delay, time)
         {
-            _StartPosition = start;
-            _EndPosition = end;
+            _StartScale= startScale;
+            _EndScale = endScale;
         }
 
         public override void Update(GameTime gameTime)
@@ -37,17 +37,17 @@ namespace Triple_Triad.SpriteAnimation
 
         public override void PreAnimation()
         {
-            _Sprite.Position = _StartPosition;
+            _Sprite.Scale = _StartScale;
         }
 
         public override void AnimationLogic()
         {
-            _Sprite.Position = (_EndPosition - _StartPosition) * ((float)_AnimationCount / _AnimationInterval) + _StartPosition;
+            _Sprite.Scale = _StartScale + ((float)_AnimationCount / _AnimationInterval) * (_EndScale - _StartScale);
         }
 
         public override void PostAnimation()
         {
-            _Sprite.Position = _EndPosition;
+            _Sprite.Scale = _EndScale;
         }
     }
 }

@@ -18,6 +18,7 @@ namespace Triple_Triad
         protected Rectangle _Rectangle;
         protected Color _TintColor;
         protected float _Rotation;
+        protected Vector2 _Center;
         protected float _Scale;
         protected float _Depth;
 
@@ -56,6 +57,11 @@ namespace Triple_Triad
             get { return _Rotation; }
             set { _Rotation = value; }
         }
+        public Vector2 Center
+        {
+            get { return _Center; }
+            set { _Center = value; }
+        }
         public float Scale
         {
             get { return _Scale; }
@@ -84,6 +90,7 @@ namespace Triple_Triad
             _Rectangle = new Rectangle(0, 0, 0, 0);
             _TintColor = Color.White;
             _Rotation = 0;
+            _Center = Vector2.Zero;
             _Scale = 1;
             _Depth = 0.1f;
         }
@@ -108,7 +115,7 @@ namespace Triple_Triad
 
         public override void Draw(GameTime gameTime)
         {
-            Global.SpriteBatch.Draw(_Texture, _Position, _Rectangle, _TintColor.A == 0 ? Color.Transparent : _TintColor, _Rotation, Vector2.Zero, _Scale, SpriteEffects.None, _Depth);
+            Global.SpriteBatch.Draw(_Texture, _Position + _Center * _Scale, _Rectangle, _TintColor.A == 0 ? Color.Transparent : _TintColor, _Rotation, _Center, _Scale, SpriteEffects.None, _Depth);
         }
 
         public bool IsSelected()

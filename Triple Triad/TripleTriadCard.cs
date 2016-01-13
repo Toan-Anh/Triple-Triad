@@ -89,9 +89,9 @@ namespace Triple_Triad
             if (_IsOpen)
             {
                 if (_PlayerNumber == 1)
-                    Global.SpriteBatch.Draw(TripleTriadCardLib.Player1Background, _Position, null, _TintColor, 0, Vector2.Zero, _Scale, SpriteEffects.None, _Depth - 0.001f);
+                    Global.SpriteBatch.Draw(TripleTriadCardLib.Player1Background, _Position, null, _TintColor, _Rotation, _Center, _Scale, SpriteEffects.None, _Depth - 0.001f);
                 else if (_PlayerNumber == 2)
-                    Global.SpriteBatch.Draw(TripleTriadCardLib.Player2Background, _Position, null, _TintColor, 0, Vector2.Zero, _Scale, SpriteEffects.None, _Depth - 0.001f);
+                    Global.SpriteBatch.Draw(TripleTriadCardLib.Player2Background, _Position, null, _TintColor, _Rotation, _Center, _Scale, SpriteEffects.None, _Depth - 0.001f);
                 base.Draw(gameTime);
                 if (_Element != TripleTriadCardLib.Element.None)
                     Global.SpriteBatch.Draw(TripleTriadCardLib.Elements, _Position + new Vector2(40, 4), TripleTriadCardLib.ElementRect[(int)_Element - 1], _TintColor, 0, Vector2.Zero, _Scale, SpriteEffects.None, _Depth + 0.002f);
@@ -99,7 +99,7 @@ namespace Triple_Triad
             }
             else
             {
-                Global.SpriteBatch.Draw(TripleTriadCardLib.CardBack, _Position, null, _TintColor, 0, Vector2.Zero, _Scale, SpriteEffects.None, _Depth);
+                Global.SpriteBatch.Draw(TripleTriadCardLib.CardBack, _Position, null, _TintColor, _Rotation, _Center, _Scale, SpriteEffects.None, _Depth);
             }
         }
 

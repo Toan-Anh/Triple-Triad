@@ -19,7 +19,7 @@ namespace Triple_Triad.SpriteAnimation
         private Vector2 _TemporaryPosition;
 
         /// <summary>
-        /// Contructor for the fading animation 
+        /// Contructor for the flying animation 
         /// </summary>
         /// <param name="sprite">The sprite to be animated</param>
         /// <param name="delay">The animation delay time in miliseconds. The default value is 0.</param>

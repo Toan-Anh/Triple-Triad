@@ -18,7 +18,7 @@ namespace Triple_Triad
         public Scene_Rule()
         {
             // Set game rule
-            GameRule.Open = false;
+            GameRule.Open = true;
             GameRule.Same = true;
             GameRule.Plus = true;
             GameRule.Elemental = true;

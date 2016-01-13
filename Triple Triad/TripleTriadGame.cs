@@ -81,7 +81,7 @@ namespace Triple_Triad
             }
 
             // Set player turn
-            _PlayerTurn = 1;
+            _PlayerTurn = rand.Next(2) + 1;
 
             // Initialize card board
             _PlayedCards = new TripleTriadCard[9];

@@ -42,7 +42,6 @@ namespace Triple_Triad
         private int winningMessageInterval = 4000;
         private int winningMessageCount = 0;
 
-
         public Scene_Triple_Triad_Main()
         {
             logWriter.WriteToLog(new string('=', 80));
@@ -90,45 +89,40 @@ namespace Triple_Triad
             //RegisterAnimation("24", new SpriteAnimation_Fly(TripleTriadGame.Player2Cards[4], 0, 80), "23", FireTime.AtEnd);
 
             //StartAnimation("10");
+
+            Sprite_Animate_Simple indicator = new Sprite_Animate_Simple();
+            indicator.LoadContent("Indicator_Triangle", 4, 1);
+            indicator.Depth = 1;
+            indicator.Position = new Vector2((spriteBoard.ViewportWidth - indicator.ViewportWidth) / 2, 
+                                            (spriteBoard.ViewportHeight - indicator.ViewportHeight) / 2);
+            Vector2 p1 = new Vector2(324, 0);
+            Vector2 p2 = new Vector2(36, 0);
+            RegisterAnimation("P12", new SpriteAnimation_Move(indicator, p1, p2, 1, 100));
+            RegisterAnimation("P21", new SpriteAnimation_Move(indicator, p2, p1, 1, 100));
+            AddEntity(indicator);
+
+            RegisterAnimation("indicatorMove", new SpriteAnimation_Move(indicator, indicator.Position, TripleTriadGame.PlayerTurn == 1 ? p1 : p2, 1, 100));
+            RegisterAnimation("indicatorScale", new SpriteAnimation_Scale(indicator, 1, 100, 1f, 24f / 64), "indicatorMove", FireTime.AtStart);
+            StartAnimation("indicatorMove");
         }
 
         private void InitScreenText()
         {
+            string[] names = { "same", "plus", "samewall", "pluswall", "combo", "win", "lose", "draw" };
+
             _ScreenText = new List<Sprite>();
 
-            Sprite spriteWinning = new Sprite();
-            spriteWinning.LoadContent("win");
-            spriteWinning.Position = new Vector2((Global.ScreenWidth - spriteWinning.ViewportWidth) / 2, (Global.ScreenHeight - spriteWinning.ViewportHeight) / 2);
-            spriteWinning.Depth = 1;
-
-            Sprite spriteSame = new Sprite();
-            spriteSame.LoadContent("same");
-            spriteSame.Position = new Vector2((Global.ScreenWidth - spriteSame.ViewportWidth) / 2, (Global.ScreenHeight - spriteSame.ViewportHeight) / 2);
-            spriteSame.Depth = 1;
-
-            Sprite spritePlus = new Sprite();
-            spritePlus.LoadContent("plus");
-            spritePlus.Position = new Vector2((Global.ScreenWidth - spritePlus.ViewportWidth) / 2, (Global.ScreenHeight - spritePlus.ViewportHeight) / 2);
-            spritePlus.Depth = 1;
-
-            Sprite spriteCombo = new Sprite();
-            spriteCombo.LoadContent("combo");
-            spriteCombo.Position = new Vector2((Global.ScreenWidth - spriteCombo.ViewportWidth) / 2, (Global.ScreenHeight - spriteCombo.ViewportHeight) / 2);
-            spriteCombo.Depth = 1;
-
-            _ScreenText.Add(spriteWinning);
-            _ScreenText.Add(spriteSame);
-            _ScreenText.Add(spritePlus);
-            _ScreenText.Add(spriteCombo);
-
-            //RegisterAnimation("winFade", new SpriteAnimation_Fade(spriteWinning, 1000));
-            RegisterAnimation("winFlyIn", new SpriteAnimation_Fly(spriteWinning, 0, 100, SpriteAnimation_Fly.FlyDirection.FromRight));
-            RegisterAnimation("sameFlyIn", new SpriteAnimation_Fly(spriteSame, 0, 100, SpriteAnimation_Fly.FlyDirection.FromRight));
-            RegisterAnimation("sameFlyOut", new SpriteAnimation_Fly(spriteSame, 600, 100, SpriteAnimation_Fly.FlyDirection.ToLeft));
-            RegisterAnimation("plusFlyIn", new SpriteAnimation_Fly(spritePlus, 0, 100, SpriteAnimation_Fly.FlyDirection.FromRight));
-            RegisterAnimation("plusFlyOut", new SpriteAnimation_Fly(spritePlus, 600, 100, SpriteAnimation_Fly.FlyDirection.ToLeft));
-            RegisterAnimation("comboFlyIn", new SpriteAnimation_Fly(spriteCombo, 0, 100, SpriteAnimation_Fly.FlyDirection.FromRight));
-            RegisterAnimation("comboFadeOut", new SpriteAnimation_Fade(spriteCombo, 600, 100, 255, 0));
+            for (int i = 0; i < names.Length; ++i)
+            {
+                Sprite tmp = new Sprite();
+                tmp.LoadContent(names[i]);
+                tmp.Position = new Vector2((Global.ScreenWidth - tmp.ViewportWidth) / 2, (Global.ScreenHeight - tmp.ViewportHeight) / 2);
+                tmp.Depth = 1;
+                _ScreenText.Add(tmp);
+                RegisterAnimation(names[i] + "FlyIn", new SpriteAnimation_Fly(tmp, 0, 100, SpriteAnimation_Fly.FlyDirection.FromRight));
+                if (i < 5)
+                    RegisterAnimation(names[i] + "FlyOut", new SpriteAnimation_Fly(tmp, 500, 100, SpriteAnimation_Fly.FlyDirection.ToLeft), names[i] + "FlyIn", FireTime.AtEnd);
+            }
         }
 
         private void InitScorePosition()
@@ -174,22 +168,34 @@ namespace Triple_Triad
             {
                 if (TripleTriadGame.P1Score > 5)
                 {
-                    _HelpWindow.Text = "Win";
+                    //_HelpWindow.Text = "Win";
                     if (winningMessageCount == 0)
                     {
                         Song BGM = Global.Content.Load<Song>("Audio/05");
                         MediaPlayer.Stop();
                         MediaPlayer.Play(BGM);
-                        StartAnimation("winFade");
+                        //StartAnimation("winFade");
                         StartAnimation("winFlyIn");
                     }
-                    winningMessageCount += gameTime.ElapsedGameTime.Milliseconds;
                 }
                 else if (TripleTriadGame.P1Score < 5)
-                    _HelpWindow.Text = "Lose";
+                {
+                    //_HelpWindow.Text = "Lose";
+                    if (winningMessageCount == 0)
+                    {
+                        StartAnimation("loseFlyIn");
+                    }
+                }
                 else
-                    _HelpWindow.Text = "Draw";
-                _HelpWindow.Open();
+                {
+                    //_HelpWindow.Text = "Draw";
+                    if (winningMessageCount == 0)
+                    {
+                        StartAnimation("drawFlyIn");
+                    }
+                }
+                //_HelpWindow.Open();
+                winningMessageCount += gameTime.ElapsedGameTime.Milliseconds;
                 if (winningMessageCount >= winningMessageInterval)
                     Global.SceneManager.CurrentScene = new Scene_Result();
                 return;
@@ -202,7 +208,7 @@ namespace Triple_Triad
             }
             else if (TripleTriadGame.PlayerTurn == 2)
             {
-                SimulateTraversingCards(gameTime, TripleTriadGame.Player2Cards, 2);
+                //SimulateTraversingCards(gameTime, TripleTriadGame.Player2Cards, 2);
                 UpdatePlayersCardPositions(gameTime, TripleTriadGame.Player2Cards, 2);
                 PlayNextCard(2);
             }
@@ -241,6 +247,7 @@ namespace Triple_Triad
 
         private void ChangePlayersTurn()
         {
+            StartAnimation("P" + TripleTriadGame.PlayerTurn + (3 - TripleTriadGame.PlayerTurn));
             TripleTriadGame.PlayerTurn = 3 - TripleTriadGame.PlayerTurn;
             logWriter.WriteToLog("--- PLAYER " + TripleTriadGame.PlayerTurn + " ---");
             if (!GameRule.Open)
@@ -254,6 +261,7 @@ namespace Triple_Triad
                         if (!TripleTriadGame.PlayedCards.Contains(TripleTriadGame.Player2Cards[i]))
                             TripleTriadGame.Player2Cards[i].IsOpen = false;
                     }
+                    
                 }
                 else if (TripleTriadGame.PlayerTurn == 2)
                 {
@@ -456,7 +464,7 @@ namespace Triple_Triad
                         logWriter.WriteToLog("[SAME] " + currentCard.Name + " adjacent to " + adjacentCard1.Name + " and " + adjacentCard2.Name);
                         StartAnimation("sameFlyIn");
                         Global.SFXManager.FlyIn.Play();
-                        StartAnimation("sameFlyOut");
+
                         if (adjacentCard1.PlayerNumber != player)
                         {
                             logWriter.WriteToLog("[SAME] " + adjacentCard1.Name + " taken by PLAYER " + player);
@@ -523,7 +531,7 @@ namespace Triple_Triad
                         logWriter.WriteToLog("[PLUS] " + currentCard.Name + " adjacent to " + adjacentCard1.Name + " and " + adjacentCard2.Name);
                         StartAnimation("plusFlyIn");
                         Global.SFXManager.FlyIn.Play();
-                        StartAnimation("plusFlyOut");
+
                         if (adjacentCard1.PlayerNumber != player)
                         {
                             logWriter.WriteToLog("[PLUS] " + adjacentCard1.Name + " taken by PLAYER " + player);
@@ -692,7 +700,7 @@ namespace Triple_Triad
             spriteBoard.Draw(gameTime);
             for (int i = 0; i < 9; ++i)
                 if (TripleTriadGame.Elements[i] != TripleTriadCardLib.Element.None)
-                    Global.SpriteBatch.Draw(TripleTriadCardLib.Elements, new Vector2(118 + 64 * (i % 3), 39.5f + 64 * (i / 3)), TripleTriadCardLib.ElementRect[(int)TripleTriadGame.Elements[i] - 1], Color.White, 0, Vector2.Zero, 1f, SpriteEffects.None, 0.001f);
+                    Global.SpriteBatch.Draw(TripleTriadCardLib.Elements, new Vector2(118 + 64 * (i % 3), 39.5f + 64 * (i / 3)), TripleTriadCardLib.ElementRect[(int)TripleTriadGame.Elements[i] - 1], new Color(160, 160, 160, 160), 0, Vector2.Zero, 1f, SpriteEffects.None, 0.001f);
             foreach (VisibleEntity entity in _SceneEntities)
                 entity.Draw(gameTime);
 

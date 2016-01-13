@@ -60,6 +60,9 @@
     <Compile Include="SpriteAnimation\SpriteAnimation_Fade.cs" />
     <Compile Include="SpriteAnimation\SpriteAnimation_Fly.cs" />
     <Compile Include="SpriteAnimation\SpriteAnimation_Move.cs" />
+    <Compile Include="SpriteAnimation\SpriteAnimation_Rotate.cs" />
+    <Compile Include="SpriteAnimation\SpriteAnimation_Scale.cs" />
+    <Compile Include="Sprite_Animate_Simple.cs" />
     <Compile Include="TripleTriadCard.cs" />
     <Compile Include="TripleTriadCardLib.cs" />
     <Compile Include="TripleTriadGame.cs" />
