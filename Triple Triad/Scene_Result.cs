@@ -14,16 +14,6 @@ namespace Triple_Triad
 
         public Scene_Result()
         {
-            // Set game rule
-            GameRule.Open = false;
-            GameRule.Same = true;
-            GameRule.Plus = true;
-            GameRule.Elemental = true;
-            GameRule.Random = true;
-
-            // Initialize the game
-            TripleTriadGame.Initialize();
-
             // Set background
             background = new Sprite();
             background.LoadContent("Game Complete Screen");

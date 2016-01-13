@@ -68,8 +68,6 @@ namespace Triple_Triad.SpriteAnimation
                     _AnimationDelayCount += gameTime.ElapsedGameTime.Milliseconds;
                 else
                 {
-                    if (_AnimationCount == 0)
-                        Global.SFXManager.Card.Play();
                     if (_AnimationCount < _AnimationInterval)
                     {
                         _AnimationCount = MathHelper.Clamp(_AnimationCount + gameTime.ElapsedGameTime.Milliseconds, 0, _AnimationInterval);

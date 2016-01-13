@@ -18,7 +18,7 @@ namespace Triple_Triad
         public Scene_Rule()
         {
             // Set game rule
-            GameRule.Open = true;
+            GameRule.Open = false;
             GameRule.Same = true;
             GameRule.Plus = true;
             GameRule.Elemental = true;
@@ -61,6 +61,7 @@ namespace Triple_Triad
         {
             _RuleWindow = new Window();
             _RuleWindow.Text = "Open:          " + GameRule.Open + "\n";
+            _RuleWindow.Text += "Random:        " + GameRule.Random + "\n";
             _RuleWindow.Text += "Elemental:     " + GameRule.Elemental + "\n";
             _RuleWindow.Text += "Same:          " + GameRule.Same + "\n";
             _RuleWindow.Text += "Same Wall:     " + GameRule.SameWall + "\n";

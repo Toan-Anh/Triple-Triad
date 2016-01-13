@@ -105,8 +105,52 @@ namespace Triple_Triad
                 card2.PlayerNumber = 2;
                 _Player1Cards[i] = card1;
                 _Player2Cards[i] = card2;
-                _Player2Cards[i].IsOpen = GameRule.Open;
+                _Player1Cards[i].IsOpen = (_PlayerTurn == 1 || GameRule.Open);
+                _Player2Cards[i].IsOpen = (_PlayerTurn == 2 || GameRule.Open);
             }
+        }
+
+        public static void SuddenDeathHandRedistribution()
+        {
+            List<TripleTriadCard> newP1Cards = new List<TripleTriadCard>();
+            List<TripleTriadCard> newP2Cards = new List<TripleTriadCard>();
+
+            for (int i = 0; i < 5; ++i)
+            {
+                TripleTriadCard card = _Player1Cards[i];
+                if (card.PlayerNumber == 1)
+                {
+                    if (newP1Cards.Count > 5)
+                        newP1Cards.Add(card);
+                    else
+                        newP2Cards.Add(card);
+                }
+                else if (card.PlayerNumber == 2)
+                {
+                    if (newP2Cards.Count > 5)
+                        newP2Cards.Add(card);
+                    else
+                        newP1Cards.Add(card);
+                }
+                card = _Player2Cards[i];
+                if (card.PlayerNumber == 1)
+                {
+                    if (newP1Cards.Count > 5)
+                        newP1Cards.Add(card);
+                    else
+                        newP2Cards.Add(card);
+                }
+                else if (card.PlayerNumber == 2)
+                {
+                    if (newP2Cards.Count > 5)
+                        newP2Cards.Add(card);
+                    else
+                        newP1Cards.Add(card);
+                }
+            }
+
+            _Player1Cards = newP1Cards.ToArray();
+            _Player2Cards = newP2Cards.ToArray();
         }
     }
 }
