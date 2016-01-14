@@ -18,7 +18,7 @@ namespace Triple_Triad
         public Scene_Rule()
         {
             // Set game rule
-            GameRule.Open = false;
+            GameRule.Open = true;
             GameRule.Same = true;
             GameRule.Plus = true;
             GameRule.Elemental = true;
@@ -80,7 +80,7 @@ namespace Triple_Triad
             {
                 if (GameRule.Random)
                 {
-                    TripleTriadGame.GenerateRandomHands();
+                    TripleTriadGame.GenerateTestHands2();
                     Global.SceneManager.CurrentScene = new Scene_Triple_Triad_Main();
                 }
                 //else

@@ -88,6 +88,58 @@ namespace Triple_Triad
             //GenerateRandomHands();
         }
 
+        public static void GenerateTestHands1()
+        {
+            _PlayerTurn = 2;
+            _Player1Cards = new TripleTriadCard[5];
+            _Player2Cards = new TripleTriadCard[5];
+
+            int[] p1Cards = { 87, 3, 109, 0, 0};
+            int[] p2Cards = { 82, 40, 34, 0, 0};
+
+            for (int i = 0; i < 5; ++i)
+            {
+                TripleTriadCard card1 = TripleTriadCardLib.CardInfo[p1Cards [i]].GetInstance();
+                TripleTriadCard card2 = TripleTriadCardLib.CardInfo[p2Cards[i]].GetInstance();
+                card1.Position = TripleTriadCardLib.Player1HandPos[i];
+                card2.Position = TripleTriadCardLib.Player2HandPos[i];
+                card1.Depth = i * 0.1f + 0.1f;
+                card2.Depth = i * 0.1f + 0.1f;
+                card1.PlayerNumber = 1;
+                card2.PlayerNumber = 2;
+                _Player1Cards[i] = card1;
+                _Player2Cards[i] = card2;
+                _Player1Cards[i].IsOpen = (_PlayerTurn == 1 || GameRule.Open);
+                _Player2Cards[i].IsOpen = (_PlayerTurn == 2 || GameRule.Open);
+            }
+        }
+
+        public static void GenerateTestHands2()
+        {
+            _PlayerTurn = 1;
+            _Player1Cards = new TripleTriadCard[5];
+            _Player2Cards = new TripleTriadCard[5];
+
+            int[] p1Cards = { 101, 86, 69, 34, 0 };
+            int[] p2Cards = { 97, 7, 103, 0, 0 };
+
+            for (int i = 0; i < 5; ++i)
+            {
+                TripleTriadCard card1 = TripleTriadCardLib.CardInfo[p1Cards[i]].GetInstance();
+                TripleTriadCard card2 = TripleTriadCardLib.CardInfo[p2Cards[i]].GetInstance();
+                card1.Position = TripleTriadCardLib.Player1HandPos[i];
+                card2.Position = TripleTriadCardLib.Player2HandPos[i];
+                card1.Depth = i * 0.1f + 0.1f;
+                card2.Depth = i * 0.1f + 0.1f;
+                card1.PlayerNumber = 1;
+                card2.PlayerNumber = 2;
+                _Player1Cards[i] = card1;
+                _Player2Cards[i] = card2;
+                _Player1Cards[i].IsOpen = (_PlayerTurn == 1 || GameRule.Open);
+                _Player2Cards[i].IsOpen = (_PlayerTurn == 2 || GameRule.Open);
+            }
+        }
+
         public static void GenerateRandomHands()
         {
             _Player1Cards = new TripleTriadCard[5];

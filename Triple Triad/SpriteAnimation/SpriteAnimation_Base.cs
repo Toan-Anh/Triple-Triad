@@ -102,7 +102,14 @@ namespace Triple_Triad.SpriteAnimation
             _AnimationDelayCount = 0;
             _AnimationCount = 0;
             _AnimationState = AnimationState.Waiting;
-            PreAnimation();
+            //PreAnimation();
+            ResetSiblingAnimations();
+        }
+
+        public virtual void ResetSiblingAnimations()
+        {
+            foreach (SpriteAnimation_Base sibling in _SiblingAnimation)
+                sibling.Reset();
         }
 
         public abstract void PreAnimation();

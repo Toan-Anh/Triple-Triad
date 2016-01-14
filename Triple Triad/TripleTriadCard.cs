@@ -72,6 +72,19 @@ namespace Triple_Triad
 
             _PlayerNumber = 1;
             base.LoadContent(path + _Name);
+
+            //RenderTarget2D renderTarget = new RenderTarget2D(Global.Graphics.GraphicsDevice,
+            //    _Texture.Width, _Texture.Height);
+            //Global.Graphics.GraphicsDevice.SetRenderTarget(renderTarget);
+            //Global.Graphics.GraphicsDevice.Clear(Color.Transparent);
+            //Global.SpriteBatch.Begin();
+            //Global.SpriteBatch.Draw(_Texture, _Position + _Center * _Scale, _Rectangle, _TintColor.A == 0 ? Color.Transparent : _TintColor, _Rotation, _Center, _Scale, SpriteEffects.None, _Depth);
+            //if (_Element != TripleTriadCardLib.Element.None)
+            //    Global.SpriteBatch.Draw(TripleTriadCardLib.Elements, _Position + new Vector2(40, 4), TripleTriadCardLib.ElementRect[(int)_Element - 1], _TintColor, 0, Vector2.Zero, _Scale, SpriteEffects.None, _Depth + 0.002f);
+            //DrawCardValues();
+            //Global.SpriteBatch.End();
+            //Global.Graphics.GraphicsDevice.SetRenderTarget(null);
+            //_Texture = renderTarget;
         }
 
         public override void UnloadContent()

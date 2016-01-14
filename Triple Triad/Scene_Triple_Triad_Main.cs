@@ -13,6 +13,11 @@ using Triple_Triad.SpriteAnimation;
 
 namespace Triple_Triad
 {
+    enum MainSwitches
+    {
+        Same, Plus, SameWall, PlusWall, ComboCheck, Combo, Normal, None, EndGame, 
+    }
+
     class Scene_Triple_Triad_Main : Scene
     {
         LogWriter logWriter = LogWriter.Instance;
@@ -36,11 +41,16 @@ namespace Triple_Triad
 
         private Random rand;
 
+        //--------------------------------------------------
+        List<int> _CardsTakenIndices = new List<int>();
+        MainSwitches _CurrentGameActivity = MainSwitches.None;
+        //--------------------------------------------------
+
 
         private List<Sprite> _ScreenText;
 
-        private int winningMessageInterval = 4000;
-        private int winningMessageCount = 0;
+        private int endGameInterval = 4000;
+        private int endGameCount = 0;
 
         public Scene_Triple_Triad_Main()
         {
@@ -168,63 +178,134 @@ namespace Triple_Triad
             }
         }
 
+        int counter = 0;
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-
+            counter++;
             if (_Animations["indicatorScale"].AnimationState == AnimationState.End)
             {
-                if (TripleTriadGame.NumberOfCardPlayed == 9)
+                if (_CurrentGameActivity == MainSwitches.EndGame)
+                    UpdateEndGame(gameTime);
+                else if ((_CurrentGameActivity == MainSwitches.Same && _Animations["sameFlyOut"].AnimationState == AnimationState.End) ||
+                    (_CurrentGameActivity == MainSwitches.Plus && _Animations["plusFlyOut"].AnimationState == AnimationState.End) ||
+                    (_CurrentGameActivity == MainSwitches.SameWall && _Animations["samewallFlyOut"].AnimationState == AnimationState.End) ||
+                    (_CurrentGameActivity == MainSwitches.PlusWall && _Animations["pluswallFlyOut"].AnimationState == AnimationState.End))
                 {
-                    if (TripleTriadGame.P1Score > 5)
+                    TakeCards();
+                    _CurrentGameActivity = MainSwitches.ComboCheck;
+                }
+                else if (_CurrentGameActivity == MainSwitches.ComboCheck)
+                {
+                    if (_CardsTakenIndices.Count == 0)
                     {
-                        //_HelpWindow.Text = "Win";
-                        if (winningMessageCount == 0)
-                        {
-                            Song BGM = Global.Content.Load<Song>("Audio/05");
-                            MediaPlayer.Stop();
-                            MediaPlayer.Play(BGM);
-                            //StartAnimation("winFade");
-                            StartAnimation("winFlyIn");
-                        }
-                    }
-                    else if (TripleTriadGame.P1Score < 5)
-                    {
-                        //_HelpWindow.Text = "Lose";
-                        if (winningMessageCount == 0)
-                        {
-                            StartAnimation("loseFlyIn");
-                        }
+                        if (TripleTriadGame.NumberOfCardPlayed == 9)
+                            _CurrentGameActivity = MainSwitches.EndGame;
+                        else
+                            _CurrentGameActivity = MainSwitches.None;
+                        ChangePlayersTurn();
                     }
                     else
                     {
-                        //_HelpWindow.Text = "Draw";
-                        if (winningMessageCount == 0)
+                        logWriter.WriteToLog("---Begin checking for combo's" + counter);
+                        List<int> tmp = new List<int>();
+                        for (int i = 0; i < _CardsTakenIndices.Count; ++i)
                         {
-                            StartAnimation("drawFlyIn");
+                            tmp.AddRange(PerformNormalCheck(_CardsTakenIndices[i], TripleTriadGame.PlayerTurn));
+                            logWriter.WriteToLog("For " + TripleTriadGame.PlayedCards[_CardsTakenIndices[i]].Name + ": " + tmp.Count + " possible combo's");
+                        }
+                        _CardsTakenIndices = tmp;
+                        if (_CardsTakenIndices.Count > 0)
+                        {
+                            StartAnimation("comboFlyIn");
+                            Global.SFXManager.FlyIn.Play();
+                            _CurrentGameActivity = MainSwitches.Combo;
                         }
                     }
-                    //_HelpWindow.Open();
-                    winningMessageCount += gameTime.ElapsedGameTime.Milliseconds;
-                    if (winningMessageCount >= winningMessageInterval)
-                        Global.SceneManager.CurrentScene = new Scene_Result();
-                    return;
                 }
+                else if (_CurrentGameActivity == MainSwitches.Combo && _Animations["comboFlyOut"].AnimationState == AnimationState.End)
+                {
+                    TakeCards();
+                    logWriter.WriteToLog(_CardsTakenIndices.Count + " combo card(s) taken" + counter);
+                    _CurrentGameActivity = MainSwitches.ComboCheck;
+                }
+                else if (_CurrentGameActivity == MainSwitches.None)
+                {
+                    if (TripleTriadGame.PlayerTurn == 1)
+                    {
+                        UpdatePlayersCardPositions(gameTime, TripleTriadGame.Player1Cards, 1);
+                        PlayNextCard(1);
+                    }
+                    else if (TripleTriadGame.PlayerTurn == 2)
+                    {
+                        //SimulateTraversingCards(gameTime, TripleTriadGame.Player2Cards, 2);
+                        UpdatePlayersCardPositions(gameTime, TripleTriadGame.Player2Cards, 2);
+                        PlayNextCard(2);
+                    }
 
-                if (TripleTriadGame.PlayerTurn == 1)
-                {
-                    UpdatePlayersCardPositions(gameTime, TripleTriadGame.Player1Cards, 1);
-                    PlayNextCard(1);
-                }
-                else if (TripleTriadGame.PlayerTurn == 2)
-                {
-                    //SimulateTraversingCards(gameTime, TripleTriadGame.Player2Cards, 2);
-                    UpdatePlayersCardPositions(gameTime, TripleTriadGame.Player2Cards, 2);
-                    PlayNextCard(2);
+                    if (_CurrentGameActivity == MainSwitches.Normal)
+                    {
+                        if (TripleTriadGame.NumberOfCardPlayed == 9)
+                            _CurrentGameActivity = MainSwitches.EndGame;
+                        else
+                            _CurrentGameActivity = MainSwitches.None;
+                        TakeCards();
+                        ChangePlayersTurn();
+                    }
                 }
 
                 UpdateHelpWindow(gameTime);
             }
+        }
+
+        private void TakeCards()
+        {
+            if (_CardsTakenIndices.Count > 0)
+            {
+                Global.SFXManager.CardWon.Play();
+                for (int i = 0; i < _CardsTakenIndices.Count; ++i)
+                {
+                    TripleTriadGame.PlayedCards[_CardsTakenIndices[i]].PlayerNumber = TripleTriadGame.PlayerTurn;
+                    logWriter.WriteToLog(TripleTriadGame.PlayedCards[_CardsTakenIndices[i]].Name + " taken by PLAYER " + TripleTriadGame.PlayerTurn);
+                }
+
+                if (TripleTriadGame.PlayerTurn == 1)
+                    TripleTriadGame.P1Score += _CardsTakenIndices.Count;
+                else if (TripleTriadGame.PlayerTurn == 2)
+                    TripleTriadGame.P1Score -= _CardsTakenIndices.Count;
+            }
+            //_CardsTakenIndices.Clear();
+        }
+
+        private void UpdateEndGame(GameTime gameTime)
+        {
+            if (TripleTriadGame.P1Score > 5)
+            {
+                if (endGameCount == 0)
+                {
+                    Song BGM = Global.Content.Load<Song>("Audio/05");
+                    MediaPlayer.Stop();
+                    MediaPlayer.Play(BGM);
+                    StartAnimation("winFlyIn");
+                }
+            }
+            else if (TripleTriadGame.P1Score < 5)
+            {
+                if (endGameCount == 0)
+                {
+                    StartAnimation("loseFlyIn");
+                }
+            }
+            else
+            {
+                if (endGameCount == 0)
+                {
+                    StartAnimation("drawFlyIn");
+                }
+            }
+            endGameCount += gameTime.ElapsedGameTime.Milliseconds;
+            if (endGameCount >= endGameInterval)
+                Global.SceneManager.CurrentScene = new Scene_Result();
         }
 
         private void PlayNextCard(int player)
@@ -241,7 +322,7 @@ namespace Triple_Triad
                     {
                         PlaceSelectedCard(index, player);
                         _SceneEntities.Remove(selectedGrid);
-                        ChangePlayersTurn();
+                        //ChangePlayersTurn();
                     }
                 }
                 else
@@ -418,35 +499,46 @@ namespace Triple_Triad
             TripleTriadGame.PlayedCards[boardIndex].IsOpen = true;
             selectedCard = null;
 
-            if (GameRule.Same)
+            if (_CurrentGameActivity == MainSwitches.None && GameRule.Same)
             {
                 PerformSameRuleCheck(boardIndex, player);
             }
-            if (GameRule.Plus)
+            if (_CurrentGameActivity == MainSwitches.None && GameRule.Plus)
             {
                 PerformPlusRuleCheck(boardIndex, player);
             }
 
-            PerformNormalCheck(boardIndex, player);
+            if (_CurrentGameActivity == MainSwitches.None)
+            {
+                PerformNormalCheck(boardIndex, player);
+                _CurrentGameActivity = MainSwitches.Normal;
+            }
         }
 
-        private void PerformSameRuleCheck(int boardIndex, int player)
+        private int[] GetAdjacentIndices(int boardIndex)
         {
             int up = boardIndex - 3;
             int down = boardIndex + 3;
             int left = boardIndex - 1;
             int right = boardIndex + 1;
-            int count = 0;
 
-            List<int> adjacentIndices = new List<int>();
-            adjacentIndices.Add(down < 9 ? down : -1); // down
-            adjacentIndices.Add(left >= 0 && left % 3 != 2 ? left : -1); // left
-            adjacentIndices.Add(right < 9 && right % 3 != 0 ? right : -1); // right
-            adjacentIndices.Add(up >= 0 ? up : -1); // up
+            int[] adjacentIndices = new int[4];
+            adjacentIndices[0] = (down < 9 ? down : -1); // down
+            adjacentIndices[1] = (left >= 0 && left % 3 != 2 ? left : -1); // left
+            adjacentIndices[2] = (right < 9 && right % 3 != 0 ? right : -1); // right
+            adjacentIndices[3] = (up >= 0 ? up : -1); // up
 
+            return adjacentIndices;
+        }
+
+        private void PerformSameRuleCheck(int boardIndex, int player)
+        {
+            int[] adjacentIndices = GetAdjacentIndices(boardIndex);
+            //int count = 0;
             TripleTriadCard currentCard = TripleTriadGame.PlayedCards[boardIndex];
+            //List<int> comboCheckIndices = new List<int>();
+            _CardsTakenIndices = new List<int>();
 
-            List<int> comboCheckIndices = new List<int>();
             for (int i = 0; i < 4; ++i)
             {
                 for (int j = i + 1; j < 4; ++j)
@@ -461,59 +553,57 @@ namespace Triple_Triad
                         StartAnimation("sameFlyIn");
                         Global.SFXManager.FlyIn.Play();
 
+                        _CurrentGameActivity = MainSwitches.Same;
+
                         if (adjacentCard1.PlayerNumber != player)
                         {
                             logWriter.WriteToLog("[SAME] " + adjacentCard1.Name + " taken by PLAYER " + player);
-                            adjacentCard1.PlayerNumber = player;
-                            comboCheckIndices.Add(adjacentIndices[i]);
-                            ++count;
+                            if (!_CardsTakenIndices.Contains(adjacentIndices[i]))
+                                _CardsTakenIndices.Add(adjacentIndices[i]);
+                            //adjacentCard1.PlayerNumber = player;
+                            //comboCheckIndices.Add(adjacentIndices[i]);
+                            //++count;
                         }
                         if (adjacentCard2.PlayerNumber != player)
                         {
                             logWriter.WriteToLog("[SAME] " + adjacentCard2.Name + " taken by PLAYER " + player);
-                            adjacentCard2.PlayerNumber = player;
-                            comboCheckIndices.Add(adjacentIndices[j]);
-                            ++count;
+                            if (!_CardsTakenIndices.Contains(adjacentIndices[j]))
+                                _CardsTakenIndices.Add(adjacentIndices[j]);
+                            //adjacentCard2.PlayerNumber = player;
+                            //comboCheckIndices.Add(adjacentIndices[j]);
+                            //++count;
                         }
                     }
                 }
             }
 
-            if (player == 1)
-                TripleTriadGame.P1Score += count;
-            else
-                TripleTriadGame.P1Score -= count;
+            //if (player == 1)
+            //    TripleTriadGame.P1Score += count;
+            //else
+            //    TripleTriadGame.P1Score -= count;
 
 
             // Perform Combo check
-            while (comboCheckIndices.Count > 0)
-            {
-                List<int> tmp = new List<int>();
-                for (int i = 0; i < comboCheckIndices.Count; ++i)
-                {
-                    tmp.AddRange(PerformNormalCheck(comboCheckIndices[i], player));
-                }
-                comboCheckIndices = tmp;
-            }
+            //while (comboCheckIndices.Count > 0)
+            //{
+            //    List<int> tmp = new List<int>();
+            //    for (int i = 0; i < comboCheckIndices.Count; ++i)
+            //    {
+            //        tmp.AddRange(PerformNormalCheck(comboCheckIndices[i], player));
+            //    }
+            //    comboCheckIndices = tmp;
+            //}
         }
 
         private void PerformPlusRuleCheck(int boardIndex, int player)
         {
-            int up = boardIndex - 3;
-            int down = boardIndex + 3;
-            int left = boardIndex - 1;
-            int right = boardIndex + 1;
-            int count = 0;
-
-            List<int> adjacentIndices = new List<int>();
-            adjacentIndices.Add(down < 9 ? down : -1); // down
-            adjacentIndices.Add(left >= 0 && left % 3 != 2 ? left : -1); // left
-            adjacentIndices.Add(right < 9 && right % 3 != 0 ? right : -1); // right
-            adjacentIndices.Add(up >= 0 ? up : -1); // up
-
+            int[] adjacentIndices = GetAdjacentIndices(boardIndex);
+            //int count = 0;
             TripleTriadCard currentCard = TripleTriadGame.PlayedCards[boardIndex];
+            //List<int> comboCheckIndices = new List<int>();
 
-            List<int> comboCheckIndices = new List<int>();
+            _CardsTakenIndices = new List<int>();
+
             for (int i = 0; i < 4; ++i)
             {
                 for (int j = i + 1; j < 4; ++j)
@@ -528,58 +618,57 @@ namespace Triple_Triad
                         StartAnimation("plusFlyIn");
                         Global.SFXManager.FlyIn.Play();
 
+                        _CurrentGameActivity = MainSwitches.Plus;                        
+
                         if (adjacentCard1.PlayerNumber != player)
                         {
                             logWriter.WriteToLog("[PLUS] " + adjacentCard1.Name + " taken by PLAYER " + player);
-                            adjacentCard1.PlayerNumber = player;
-                            comboCheckIndices.Add(adjacentIndices[i]);
-                            ++count;
+                            if (!_CardsTakenIndices.Contains(adjacentIndices[i]))
+                                _CardsTakenIndices.Add(adjacentIndices[i]);
+                            //adjacentCard1.PlayerNumber = player;
+                            //comboCheckIndices.Add(adjacentIndices[i]);
+                            //++count;
                         }
                         if (adjacentCard2.PlayerNumber != player)
                         {
                             logWriter.WriteToLog("[PLUS] " + adjacentCard2.Name + " taken by PLAYER " + player);
-                            adjacentCard2.PlayerNumber = player;
-                            comboCheckIndices.Add(adjacentIndices[j]);
-                            ++count;
+                            if (!_CardsTakenIndices.Contains(adjacentIndices[j]))
+                                _CardsTakenIndices.Add(adjacentIndices[j]);
+                            //adjacentCard2.PlayerNumber = player;
+                            //comboCheckIndices.Add(adjacentIndices[j]);
+                            //++count;
                         }
                     }
                 }
             }
 
-            if (player == 1)
-                TripleTriadGame.P1Score += count;
-            else
-                TripleTriadGame.P1Score -= count;
+            //if (player == 1)
+            //    TripleTriadGame.P1Score += count;
+            //else
+            //    TripleTriadGame.P1Score -= count;
 
 
             // Perform Combo check
-            while (comboCheckIndices.Count > 0)
-            {
-                List<int> tmp = new List<int>();
-                for (int i = 0; i < comboCheckIndices.Count; ++i)
-                {
-                    tmp.AddRange(PerformNormalCheck(comboCheckIndices[i], player));
-                }
-                comboCheckIndices = tmp;
-            }
+            //while (comboCheckIndices.Count > 0)
+            //{
+            //    List<int> tmp = new List<int>();
+            //    for (int i = 0; i < comboCheckIndices.Count; ++i)
+            //    {
+            //        tmp.AddRange(PerformNormalCheck(comboCheckIndices[i], player));
+            //    }
+            //    comboCheckIndices = tmp;
+            //}
         }
 
         private List<int> PerformNormalCheck(int boardIndex, int player)
         {
             List<int> possibleComboIndices = new List<int>();
-            int up = boardIndex - 3;
-            int down = boardIndex + 3;
-            int left = boardIndex - 1;
-            int right = boardIndex + 1;
-            int count = 0;
-
-            List<int> adjacentIndices = new List<int>();
-            adjacentIndices.Add(down < 9 ? down : -1); // down
-            adjacentIndices.Add(left >= 0 && left % 3 != 2 ? left : -1); // left
-            adjacentIndices.Add(right < 9 && right % 3 != 0 ? right : -1); // right
-            adjacentIndices.Add(up >= 0 ? up : -1); // up
-
+            int[] adjacentIndices = GetAdjacentIndices(boardIndex);
+            //int count = 0;
             TripleTriadCard currentCard = TripleTriadGame.PlayedCards[boardIndex];
+
+            if (_CurrentGameActivity == MainSwitches.None)
+                _CardsTakenIndices = new List<int>();
 
             int valueModifier1 = 0;
             if (TripleTriadGame.Elements[boardIndex] != TripleTriadCardLib.Element.None)
@@ -605,18 +694,20 @@ namespace Triple_Triad
                 if (adjacentCard != null && currentCard.PlayerNumber != adjacentCard.PlayerNumber && 
                     currentCard.CardValue[i] + valueModifier1 > adjacentCard.CardValue[3 - i] + valueModifier2)
                 {
-                    logWriter.WriteToLog(adjacentCard.Name + " taken by PLAYER " + player + " using " + currentCard.Name);
-                    adjacentCard.PlayerNumber = player;
+                    if (_CurrentGameActivity == MainSwitches.None)
+                        if (!_CardsTakenIndices.Contains(adjacentIndices[i]))
+                            _CardsTakenIndices.Add(adjacentIndices[i]);
+                    //adjacentCard.PlayerNumber = player;
                     possibleComboIndices.Add(adjacentIndices[i]);
-                    ++count;
-                    Global.SFXManager.CardWon.Play();
+                    //++count;
+                    //Global.SFXManager.CardWon.Play();
                 }
             }
 
-            if (player == 1)
-                TripleTriadGame.P1Score += count;
-            else
-                TripleTriadGame.P1Score -= count;
+            //if (player == 1)
+            //    TripleTriadGame.P1Score += count;
+            //else
+            //    TripleTriadGame.P1Score -= count;
 
             return possibleComboIndices;
         }
